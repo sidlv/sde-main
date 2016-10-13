@@ -80,8 +80,13 @@ block content
     cursor: pointer;
     }
     #main {
-    transition: margin-left .5s;
-    padding: 16px;
+    //transition: margin-left .5s;
+    //padding: 16px;
+      position: absolute;
+      left: 200px;
+      top: 100px;
+      width: 25%;
+      background-size:100% 100%;
     }
     /* Add Zoom Animation */
     .animate {
@@ -106,33 +111,78 @@ block content
     width: 100%;
     }
     }
-  body
+  body(background= 'images/back5.jpg')
     #main
       h2 Account are the basic divisions under Clusters
       button(onclick="document.getElementById('id01').style.display='block'", style='width:auto;') Create
       #id01.modal
-        form.modal-content.animate(method='POST')
+        form.modal-content.animate(method='POST' ng-app='myApp' ng-controller='myCtrl')
+          .container(ng-app='')
+            b   Cluster Name  
+            select(ng-model='selectedName', ng-options='x for x in names' ng-change='onChangeCluster()')
+          .container(ng-app='')
+            b   Accounts  
+            select(ng-model='selectedAccounts', ng-options='acc for acc in accounts' ng-change='')
           .container
-            label(for='cname')
-            b Coast Name
-            input.form-control(type='text',placeholder='Enter Coast Name', name='cname', require='')
-          .container
-            label(for='accountname')
+            label(for='account')
             b Account Name
-            input.form-control(type='text', placeholder='Enter Account Name', name='accountname', required='')
-          .container
-            label(for='ausername')
-            b User Name
-            input(type='text', placeholder='Enter Your Name', name='ausername', required='')
-            button.btn.btn-primary(type='submit') Save
+            input.form-control(type='text', placeholder='Enter Account Name', name='acoount', required='')
+          //.container
+          //  label(for='ausername')
+          //  b User Name
+          //  input(type='text', placeholder='Enter Your Name', name='ausername', required='')
+          button.btn.btn-primary(type='submit') Save
           .container(style='background-color:#f1f1f1')
             button.cancelbtn(type='button', onclick="document.getElementById('id01').style.display='none'") Cancel
+      
       script.
-        // Get the modal
-        var modal = document.getElementById('id01');
-      // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-        if (event.target == modal) {
-        modal.style.display = "none";
-        }
-        }
+            var app = angular.module('myApp', []);
+            app.controller('myCtrl', function($scope,$http,$log) {
+             alert("myCtrl is running");
+             $scope.names = ['WC', 'EC', 'PP'];
+             //function call to get cluster data for cluster drop down
+             //$scope.names = getClusterData();
+
+             //the following line will be invoked when a value is selected in cluster dropdown
+             $scope.onChangeCluster = function getAccount() {
+              $scope.allaccounts = [];
+              $http.post("./getAccounts").success(function (response) {
+                alert("response : "+response);
+                for(x in response){
+                 $scope.allaccounts.push(response[x]);
+                }
+                alert("allAccounts : "+$scope.allaccounts);
+                $scope.accounts = [];
+                console.log(1);
+
+                $scope.unique = function (list) {
+                 var result = [];
+                 $.each(list, function(i, e) {
+                  if ($.inArray(e, result) == -1) result.push(e);
+                 });
+                 return result;
+                }
+                
+                alert("$scope.allaccounts : "+$scope.allaccounts);
+                for(x in $scope.allaccounts){
+                 alert("$scope.allaccounts[x] : "+$scope.allaccounts[x]);
+                 console.log("$scope.allaccounts[x].account : "+$scope.allaccounts[x].accountname);
+                 console.log("$scope.clustername : "+$scope.allaccounts[x].clustername);
+                 if( 'WC' == $scope.allaccounts[x].clustername)
+                  $scope.accounts.push($scope.allaccounts[x].accountname);
+                  $scope.accounts = $scope.unique($scope.accounts);
+                }
+                console.log(2);
+                console.log($scope.accounts);
+              });              
+             }
+            });
+      script.
+            // Get the modal
+            var modal = document.getElementById('id01');
+            //When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+             if (event.target == modal) {
+              modal.style.display = "none";
+             }
+            }
